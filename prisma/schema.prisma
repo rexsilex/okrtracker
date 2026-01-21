@@ -1,0 +1,132 @@
+// Prisma schema for OKR Tracker with Supabase
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User model - synced with Supabase Auth
+model User {
+  id        String   @id @db.Uuid
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // User's objectives and people
+  objectives Objective[]
+  people     Person[]
+
+  @@map("users")
+}
+
+// Person/Team Member model
+model Person {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  initials  String   @db.VarChar(10)
+  color     String   @db.VarChar(50)
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  winAttributions WinAttribution[]
+
+  @@index([userId])
+  @@index([name])
+  @@map("people")
+}
+
+// Objective model
+model Objective {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  category    String?  @db.VarChar(100)
+  description String?  @db.Text
+  initiatives String[] // Array of initiative descriptions
+  userId      String   @map("user_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyResults KeyResult[]
+  wins       WinLog[]    @relation("ObjectiveWins")
+
+  @@index([userId])
+  @@index([category])
+  @@index([createdAt])
+  @@map("objectives")
+}
+
+// KeyResult model
+model KeyResult {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String
+  type        KeyResultType
+  current     Float         @default(0)
+  target      Float
+  unit        String        @db.VarChar(50)
+  objectiveId String        @map("objective_id") @db.Uuid
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  winLog    WinLog[]  @relation("KeyResultWins")
+
+  @@index([objectiveId])
+  @@index([type])
+  @@map("key_results")
+}
+
+// WinLog model - Can be attached to either an Objective or a KeyResult
+model WinLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  note        String    @db.Text
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now()) @map("created_at")
+  objectiveId String?   @map("objective_id") @db.Uuid
+  keyResultId String?   @map("key_result_id") @db.Uuid
+
+  // Relations
+  objective Objective? @relation("ObjectiveWins", fields: [objectiveId], references: [id], onDelete: Cascade)
+  keyResult KeyResult? @relation("KeyResultWins", fields: [keyResultId], references: [id], onDelete: Cascade)
+
+  // Many-to-many relationship with Person for attribution
+  attributions WinAttribution[]
+
+  @@index([objectiveId])
+  @@index([keyResultId])
+  @@index([date])
+  @@map("win_logs")
+}
+
+// Junction table for many-to-many relationship between WinLog and Person
+model WinAttribution {
+  id        String   @id @default(uuid()) @db.Uuid
+  winLogId  String   @map("win_log_id") @db.Uuid
+  personId  String   @map("person_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  winLog WinLog @relation(fields: [winLogId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([winLogId, personId])
+  @@index([winLogId])
+  @@index([personId])
+  @@map("win_attributions")
+}
+
+// Enum for KeyResult types
+enum KeyResultType {
+  standard
+  leading
+  lagging
+  win_condition
+}
