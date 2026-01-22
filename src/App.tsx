@@ -266,8 +266,7 @@ const App = () => {
               <div className="flex items-center justify-between h-16">
                   <div className="flex items-center gap-12">
                       <div className="font-bold text-white tracking-tight flex items-center gap-2 text-lg">
-                         <div className="w-6 h-6 bg-gradient-to-br from-violet-500 to-violet-700 rounded-lg"></div>
-                         OKR Tracker
+                         <img src="/logo.png" alt="Frequency" className="h-7 w-auto" />
                       </div>
 
                       {/* Top Level Nav Links */}
