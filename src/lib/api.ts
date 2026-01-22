@@ -87,15 +87,18 @@ export const fetchObjectives = async (type?: ObjectiveType): Promise<Objective[]
     description: obj.description,
     initiatives: obj.initiatives || [],
     order: obj.order || 0,
-    keyResults: obj.key_results?.filter((kr: any) => !kr.deleted_at).map((kr: any) => ({
-      id: kr.id,
-      title: kr.title,
-      type: kr.type,
-      current: kr.current,
-      target: kr.target,
-      unit: kr.unit,
-      winLog: [] // Will be fetched separately if needed
-    })) || [],
+    keyResults: obj.key_results?.filter((kr: any) => !kr.deleted_at)
+      .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+      .map((kr: any) => ({
+        id: kr.id,
+        title: kr.title,
+        type: kr.type,
+        current: kr.current,
+        target: kr.target,
+        unit: kr.unit,
+        order: kr.order ?? 0,
+        winLog: [] // Will be fetched separately if needed
+      })) || [],
     wins: obj.wins?.filter((w: any) => !w.deleted_at).map((w: any) => ({
       id: w.id,
       note: w.note,
@@ -177,6 +180,18 @@ export const deleteObjective = async (id: string): Promise<void> => {
 // ==================== Key Results ====================
 
 export const createKeyResult = async (objectiveId: string, kr: Omit<KeyResult, 'id'>): Promise<KeyResult> => {
+  // Get the highest order value to place new KR at the end
+  const { data: maxOrderKr } = await supabase
+    .from('key_results')
+    .select('order')
+    .eq('objective_id', objectiveId)
+    .is('deleted_at', null)
+    .order('order', { ascending: false })
+    .limit(1)
+    .single();
+
+  const newOrder = (maxOrderKr?.order ?? -1) + 1;
+
   const { data, error } = await supabase
     .from('key_results')
     .insert({
@@ -185,7 +200,8 @@ export const createKeyResult = async (objectiveId: string, kr: Omit<KeyResult, '
       type: kr.type,
       current: kr.current,
       target: kr.target,
-      unit: kr.unit
+      unit: kr.unit,
+      order: newOrder
     })
     .select()
     .single();
@@ -199,6 +215,7 @@ export const createKeyResult = async (objectiveId: string, kr: Omit<KeyResult, '
     current: data.current,
     target: data.target,
     unit: data.unit,
+    order: data.order,
     winLog: []
   };
 };
@@ -312,20 +329,23 @@ export const fetchObjectiveWithDetails = async (objectiveId: string): Promise<Ob
     description: obj.description,
     initiatives: obj.initiatives || [],
     order: obj.order || 0,
-    keyResults: obj.key_results?.filter((kr: any) => !kr.deleted_at).map((kr: any) => ({
-      id: kr.id,
-      title: kr.title,
-      type: kr.type,
-      current: kr.current,
-      target: kr.target,
-      unit: kr.unit,
-      winLog: kr.winLog?.filter((w: any) => !w.deleted_at).map((w: any) => ({
-        id: w.id,
-        note: w.note,
-        date: new Date(w.date).toLocaleDateString(),
-        attributedTo: w.attributions?.filter((a: any) => !a.deleted_at).map((a: any) => a.person_id) || []
-      })) || []
-    })) || [],
+    keyResults: obj.key_results?.filter((kr: any) => !kr.deleted_at)
+      .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+      .map((kr: any) => ({
+        id: kr.id,
+        title: kr.title,
+        type: kr.type,
+        current: kr.current,
+        target: kr.target,
+        unit: kr.unit,
+        order: kr.order ?? 0,
+        winLog: kr.winLog?.filter((w: any) => !w.deleted_at).map((w: any) => ({
+          id: w.id,
+          note: w.note,
+          date: new Date(w.date).toLocaleDateString(),
+          attributedTo: w.attributions?.filter((a: any) => !a.deleted_at).map((a: any) => a.person_id) || []
+        })) || []
+      })) || [],
     wins: obj.wins?.filter((w: any) => !w.deleted_at).map((w: any) => ({
       id: w.id,
       note: w.note,
@@ -344,6 +364,24 @@ export const updateKeyResultProgress = async (krId: string, current: number): Pr
     .eq('id', krId);
 
   if (error) throw error;
+};
+
+// ==================== Update Key Results Order ====================
+
+export const updateKeyResultsOrder = async (keyResultOrders: { id: string; order: number }[]): Promise<void> => {
+  const updates = keyResultOrders.map(({ id, order }) =>
+    supabase
+      .from('key_results')
+      .update({ order })
+      .eq('id', id)
+  );
+
+  const results = await Promise.all(updates);
+
+  const errors = results.filter(r => r.error);
+  if (errors.length > 0) {
+    throw errors[0].error;
+  }
 };
 
 // ==================== Update Objectives Order ====================

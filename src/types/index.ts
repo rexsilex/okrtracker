@@ -22,6 +22,7 @@ export interface KeyResult {
     current: number;
     target: number;
     unit: string;
+    order?: number;
     winLog?: WinLog[];
 }
 

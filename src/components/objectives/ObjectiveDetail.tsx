@@ -1,11 +1,135 @@
 import React, { useState, useEffect } from 'react';
 import { Objective, Person, KeyResult, KeyResultType, WinLog } from '../../types';
-import { CloseIcon, ChevronLeft, ChevronRight, TrophyIcon, TrashIcon, PlusIcon, CheckIcon, EditIcon, SaveIcon, XIcon, LinkIcon } from '../icons';
+import { CloseIcon, ChevronLeft, ChevronRight, TrophyIcon, TrashIcon, PlusIcon, CheckIcon, EditIcon, SaveIcon, XIcon, LinkIcon, GripVerticalIcon } from '../icons';
 import { ProgressBar } from '../ui/SharedComponents';
 import { WinLogger, WinList } from '../ui/WinLogger';
 import { KeyResultItem } from './KeyResultItem';
 import { ConfirmModal } from '../ui/ConfirmModal';
+import { WinsDrawer } from '../ui/WinsDrawer';
 import * as api from '../../lib/api';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Sortable wrapper for KeyResultItem
+interface SortableKeyResultProps {
+    kr: KeyResult;
+    onUpdate: (updatedKr: KeyResult) => void;
+    onDelete: () => void;
+    people: Person[];
+    onLogWin?: (krId: string, note: string, attributedTo: string[]) => void;
+    onDeleteWin?: (winId: string) => void;
+}
+
+const SortableKeyResult: React.FC<SortableKeyResultProps> = ({ kr, onUpdate, onDelete, people, onLogWin, onDeleteWin }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: kr.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} className="relative">
+            <div
+                {...listeners}
+                className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center text-zinc-700 hover:text-zinc-400 cursor-grab active:cursor-grabbing z-10"
+            >
+                <GripVerticalIcon />
+            </div>
+            <div className="pl-8">
+                <KeyResultItem
+                    kr={kr}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    people={people}
+                    onLogWin={onLogWin}
+                    onDeleteWin={onDeleteWin}
+                />
+            </div>
+        </div>
+    );
+};
+
+// Sortable wrapper for Initiative items
+interface SortableInitiativeProps {
+    id: string;
+    index: number;
+    text: string;
+    url: string;
+    onRemove: () => void;
+}
+
+const SortableInitiative: React.FC<SortableInitiativeProps> = ({ id, index, text, url, onRemove }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <li ref={setNodeRef} style={style} {...attributes} className="text-sm text-zinc-300 flex items-start gap-2.5 p-2 rounded bg-zinc-800/30 group">
+            <div
+                {...listeners}
+                className="text-zinc-600 hover:text-zinc-400 cursor-grab active:cursor-grabbing mt-0.5"
+            >
+                <GripVerticalIcon />
+            </div>
+            <span className="text-violet-500 mt-1 shrink-0"><CheckIcon /></span>
+            <div className="flex-1">
+                <div>{text}</div>
+                {url && (
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 mt-1"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <LinkIcon /> {url}
+                    </a>
+                )}
+            </div>
+            <button
+                onClick={onRemove}
+                className="text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+                <XIcon />
+            </button>
+        </li>
+    );
+};
 
 interface ObjectiveDetailProps {
     objective: Objective;
@@ -24,6 +148,15 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
 }) => {
     const [showAddKr, setShowAddKr] = useState(false);
     const [activeKrTab, setActiveKrTab] = useState<'metrics' | 'conditions' | 'all'>('all');
+    const [showWinsDrawer, setShowWinsDrawer] = useState(false);
+
+    // DnD sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     // New KR Form State
     const [newKrTitle, setNewKrTitle] = useState("");
@@ -192,9 +325,84 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
         });
     };
 
+    // KR Drag & Drop Handler
+    const handleKRDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = filteredKRs.findIndex(kr => kr.id === active.id);
+        const newIndex = filteredKRs.findIndex(kr => kr.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const reordered = arrayMove(filteredKRs, oldIndex, newIndex);
+
+        // Optimistic update
+        const updatedKRs = reordered.map((kr, i) => ({ ...kr, order: i }));
+        onUpdate({
+            ...objective,
+            keyResults: activeKrTab === 'all'
+                ? updatedKRs
+                : objective.keyResults.map(kr => {
+                    const updated = updatedKRs.find(u => u.id === kr.id);
+                    return updated || kr;
+                })
+        });
+
+        // Persist to database
+        try {
+            await api.updateKeyResultsOrder(updatedKRs.map((kr, i) => ({ id: kr.id, order: i })));
+        } catch (error) {
+            console.error('Error updating key results order:', error);
+            // Revert on error
+            const refreshed = await api.fetchObjectiveWithDetails(objective.id);
+            onUpdate(refreshed);
+        }
+    };
+
+    // Initiative Drag & Drop Handler
+    const handleInitiativeDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = editedInitiatives.findIndex((_, i) => `initiative-${i}` === active.id);
+        const newIndex = editedInitiatives.findIndex((_, i) => `initiative-${i}` === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        setEditedInitiatives(arrayMove(editedInitiatives, oldIndex, newIndex));
+    };
+
+    // Win deletion from drawer
+    const handleDeleteWinFromDrawer = async (winId: string, isKeyResultWin: boolean) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Win',
+            message: 'Are you sure you want to delete this win? This action cannot be undone.',
+            onConfirm: async () => {
+                try {
+                    await api.deleteWinLog(winId);
+
+                    // If it's a KR win, update the KR's current count
+                    if (isKeyResultWin) {
+                        const kr = objective.keyResults.find(k => k.winLog?.some(w => w.id === winId));
+                        if (kr) {
+                            const newCount = Math.max(0, (kr.winLog?.length || 0) - 1);
+                            await api.updateKeyResultProgress(kr.id, newCount);
+                        }
+                    }
+
+                    const refreshed = await api.fetchObjectiveWithDetails(objective.id);
+                    onUpdate(refreshed);
+                } catch (error) {
+                    console.error('Error deleting win:', error);
+                }
+            }
+        });
+    };
+
     // Derived Lists
     const winConditions = objective.keyResults.filter(kr => kr.type === 'win_condition');
-    const filteredKRs = objective.keyResults.filter(kr => {
+    const sortedKRs = [...objective.keyResults].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const filteredKRs = sortedKRs.filter(kr => {
         if (activeKrTab === 'all') return true;
         if (activeKrTab === 'conditions') return kr.type === 'win_condition';
         return kr.type !== 'win_condition';
@@ -282,7 +490,7 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
     };
 
     return (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full h-full flex flex-col overflow-hidden shadow-2xl">
+        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full h-full flex flex-col overflow-hidden shadow-2xl relative">
             {/* Header / Nav Bar */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50">
                 <div className="flex items-center gap-4">
@@ -310,12 +518,15 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5">
+                    <button
+                        onClick={() => setShowWinsDrawer(true)}
+                        className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 hover:bg-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+                    >
                         <span className="text-xs text-zinc-500 uppercase font-bold">Total Wins</span>
                         <span className="text-yellow-500 font-bold flex items-center gap-1">
                              <TrophyIcon /> {totalWins}
                         </span>
-                    </div>
+                    </button>
                     <button
                         onClick={() => setConfirmModal({
                             isOpen: true,
@@ -457,36 +668,32 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                             </div>
                             {isEditingInitiatives ? (
                                 <div className="flex flex-col gap-3">
-                                    <ul className="space-y-2">
-                                        {editedInitiatives.map((init, i) => {
-                                            const { text, url } = parseInitiative(init);
-                                            return (
-                                                <li key={i} className="text-sm text-zinc-300 flex items-start gap-2.5 p-2 rounded bg-zinc-800/30 group">
-                                                    <span className="text-violet-500 mt-1 shrink-0"><CheckIcon /></span>
-                                                    <div className="flex-1">
-                                                        <div>{text}</div>
-                                                        {url && (
-                                                            <a
-                                                                href={url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 mt-1"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                <LinkIcon /> {url}
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleRemoveInitiative(i)}
-                                                        className="text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <XIcon />
-                                                    </button>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
+                                    <DndContext
+                                        sensors={sensors}
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={handleInitiativeDragEnd}
+                                    >
+                                        <SortableContext
+                                            items={editedInitiatives.map((_, i) => `initiative-${i}`)}
+                                            strategy={verticalListSortingStrategy}
+                                        >
+                                            <ul className="space-y-2">
+                                                {editedInitiatives.map((init, i) => {
+                                                    const { text, url } = parseInitiative(init);
+                                                    return (
+                                                        <SortableInitiative
+                                                            key={`initiative-${i}`}
+                                                            id={`initiative-${i}`}
+                                                            index={i}
+                                                            text={text}
+                                                            url={url}
+                                                            onRemove={() => handleRemoveInitiative(i)}
+                                                        />
+                                                    );
+                                                })}
+                                            </ul>
+                                        </SortableContext>
+                                    </DndContext>
                                     <div className="flex flex-col gap-2">
                                         <input
                                             type="text"
@@ -713,59 +920,77 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                             </form>
                         )}
 
-                        <div className="space-y-3 pb-8">
-                            {objective.keyResults.length === 0 ? (
-                                <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-2xl bg-zinc-900/20">
-                                    <span className="text-zinc-600 text-sm">No key results yet. Add metrics or win conditions.</span>
-                                </div>
-                            ) : filteredKRs.length === 0 ? (
-                                <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-2xl bg-zinc-900/20">
-                                    <span className="text-zinc-600 text-sm">No {activeKrTab === 'metrics' ? 'metrics' : 'win conditions'} found for this objective.</span>
-                                </div>
-                            ) : (
-                                filteredKRs.map((kr) => (
-                                    <KeyResultItem
-                                        key={kr.id}
-                                        kr={kr}
-                                        onUpdate={updateKeyResult}
-                                        onDelete={() => deleteKeyResult(kr.id)}
-                                        people={people}
-                                        onLogWin={async (krId, note, attributedTo) => {
-                                            try {
-                                                await api.createWinLog(note, attributedTo, undefined, krId);
-                                                const newCount = (kr.winLog?.length || 0) + 1;
-                                                await api.updateKeyResultProgress(krId, newCount);
-                                                const refreshed = await api.fetchObjectiveWithDetails(objective.id);
-                                                onUpdate(refreshed);
-                                            } catch (error) {
-                                                console.error('Error logging win:', error);
-                                            }
-                                        }}
-                                        onDeleteWin={(winId) => {
-                                            setConfirmModal({
-                                                isOpen: true,
-                                                title: 'Delete Win',
-                                                message: 'Are you sure you want to delete this win? This action cannot be undone.',
-                                                onConfirm: async () => {
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleKRDragEnd}
+                        >
+                            <div className="space-y-3 pb-8">
+                                {objective.keyResults.length === 0 ? (
+                                    <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-2xl bg-zinc-900/20">
+                                        <span className="text-zinc-600 text-sm">No key results yet. Add metrics or win conditions.</span>
+                                    </div>
+                                ) : filteredKRs.length === 0 ? (
+                                    <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-2xl bg-zinc-900/20">
+                                        <span className="text-zinc-600 text-sm">No {activeKrTab === 'metrics' ? 'metrics' : 'win conditions'} found for this objective.</span>
+                                    </div>
+                                ) : (
+                                    <SortableContext items={filteredKRs.map(kr => kr.id)} strategy={verticalListSortingStrategy}>
+                                        {filteredKRs.map((kr) => (
+                                            <SortableKeyResult
+                                                key={kr.id}
+                                                kr={kr}
+                                                onUpdate={updateKeyResult}
+                                                onDelete={() => deleteKeyResult(kr.id)}
+                                                people={people}
+                                                onLogWin={async (krId, note, attributedTo) => {
                                                     try {
-                                                        await api.deleteWinLog(winId);
-                                                        const newCount = Math.max(0, (kr.winLog?.length || 0) - 1);
-                                                        await api.updateKeyResultProgress(kr.id, newCount);
+                                                        await api.createWinLog(note, attributedTo, undefined, krId);
+                                                        const newCount = (kr.winLog?.length || 0) + 1;
+                                                        await api.updateKeyResultProgress(krId, newCount);
                                                         const refreshed = await api.fetchObjectiveWithDetails(objective.id);
                                                         onUpdate(refreshed);
                                                     } catch (error) {
-                                                        console.error('Error deleting win:', error);
+                                                        console.error('Error logging win:', error);
                                                     }
-                                                }
-                                            });
-                                        }}
-                                    />
-                                ))
-                            )}
-                        </div>
+                                                }}
+                                                onDeleteWin={(winId) => {
+                                                    setConfirmModal({
+                                                        isOpen: true,
+                                                        title: 'Delete Win',
+                                                        message: 'Are you sure you want to delete this win? This action cannot be undone.',
+                                                        onConfirm: async () => {
+                                                            try {
+                                                                await api.deleteWinLog(winId);
+                                                                const newCount = Math.max(0, (kr.winLog?.length || 0) - 1);
+                                                                await api.updateKeyResultProgress(kr.id, newCount);
+                                                                const refreshed = await api.fetchObjectiveWithDetails(objective.id);
+                                                                onUpdate(refreshed);
+                                                            } catch (error) {
+                                                                console.error('Error deleting win:', error);
+                                                            }
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                        ))}
+                                    </SortableContext>
+                                )}
+                            </div>
+                        </DndContext>
                     </div>
                 </div>
             </div>
+
+            {/* Wins Drawer */}
+            <WinsDrawer
+                isOpen={showWinsDrawer}
+                onClose={() => setShowWinsDrawer(false)}
+                objectiveWins={objective.wins || []}
+                keyResults={objective.keyResults}
+                people={people}
+                onDeleteWin={handleDeleteWinFromDrawer}
+            />
 
             {/* Confirmation Modal */}
             <ConfirmModal
