@@ -45,3 +45,5 @@ app.zip
 
 # MCP config
 .mcp.json
+.vercel
+.env*.local
