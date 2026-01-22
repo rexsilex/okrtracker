@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { KeyResult, Person, WinLog } from '../../types';
-import { PlusIcon, MinusIcon, TrashIcon, TrophyIcon } from '../icons';
+import { KeyResult, Person, WinLog, KeyResultType } from '../../types';
+import { PlusIcon, MinusIcon, TrashIcon, TrophyIcon, EditIcon, SaveIcon, XIcon } from '../icons';
 import { KRTypeBadge } from '../ui/SharedComponents';
 import { WinLogger, WinList } from '../ui/WinLogger';
 
@@ -21,7 +21,11 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
   onLogWin,
   onDeleteWin,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(kr.title);
+  const [editedUnit, setEditedUnit] = useState(kr.unit);
+  const [editedType, setEditedType] = useState<KeyResultType>(kr.type);
 
   const progress = kr.target === 0 ? 0 : (kr.current / kr.target) * 100;
   const isWinCondition = kr.type === 'win_condition';
@@ -72,27 +76,112 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
     }
   }
 
+  const handleStartEditDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditedTitle(kr.title);
+    setEditedUnit(kr.unit);
+    setEditedType(kr.type);
+    setIsEditingDetails(true);
+  };
+
+  const handleSaveDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (editedTitle.trim()) {
+      onUpdate({
+        ...kr,
+        title: editedTitle.trim(),
+        unit: editedUnit.trim(),
+        type: editedType
+      });
+    }
+    setIsEditingDetails(false);
+  };
+
+  const handleCancelEditDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditedTitle(kr.title);
+    setEditedUnit(kr.unit);
+    setEditedType(kr.type);
+    setIsEditingDetails(false);
+  };
+
   return (
-    <div className={`group border border-zinc-800/50 bg-zinc-900/30 rounded-xl transition-all ${isEditing ? 'ring-1 ring-violet-500/50 bg-zinc-900' : 'hover:bg-zinc-900'}`}>
+    <div className={`group border border-zinc-800/50 bg-zinc-900/30 rounded-xl transition-all ${isExpanded ? 'ring-1 ring-violet-500/50 bg-zinc-900' : 'hover:bg-zinc-900'}`}>
       <div
         className="p-4 cursor-pointer select-none"
-        onClick={() => setIsEditing(!isEditing)}
+        onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex justify-between items-start mb-3">
           <div className="flex flex-col gap-1.5 flex-1 pr-4">
               <div className="flex items-center gap-2">
                  <KRTypeBadge type={kr.type} onSwap={handleSwapType} />
               </div>
-              <span className="font-medium text-zinc-200 flex items-start gap-2 leading-tight">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${progress >= 100 ? (isWinCondition ? 'bg-pink-500' : 'bg-violet-500') : 'bg-violet-500'}`}></div>
-                {kr.title}
-              </span>
+              {isEditingDetails ? (
+                <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="font-medium text-zinc-200 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500/50"
+                    placeholder="Key result title..."
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveDetails(e as any);
+                      if (e.key === 'Escape') handleCancelEditDetails(e as any);
+                    }}
+                  />
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={editedType}
+                      onChange={(e) => setEditedType(e.target.value as KeyResultType)}
+                      className="bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-300 focus:outline-none focus:border-violet-500/50"
+                    >
+                      <option value="leading">Leading</option>
+                      <option value="lagging">Lagging</option>
+                      <option value="win_condition">Win Condition</option>
+                    </select>
+                    {editedType !== 'win_condition' && (
+                      <input
+                        type="text"
+                        value={editedUnit}
+                        onChange={(e) => setEditedUnit(e.target.value)}
+                        className="w-20 bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-300 focus:outline-none focus:border-violet-500/50"
+                        placeholder="Unit"
+                      />
+                    )}
+                    <button
+                      onClick={handleSaveDetails}
+                      className="px-2 py-1 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-lg flex items-center gap-1 transition-colors"
+                    >
+                      <SaveIcon /> Save
+                    </button>
+                    <button
+                      onClick={handleCancelEditDetails}
+                      className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs rounded-lg flex items-center gap-1 transition-colors"
+                    >
+                      <XIcon /> Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <span className="font-medium text-zinc-200 flex items-start gap-2 leading-tight group/title">
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${progress >= 100 ? (isWinCondition ? 'bg-pink-500' : 'bg-violet-500') : 'bg-violet-500'}`}></div>
+                  {kr.title}
+                  <button
+                    onClick={handleStartEditDetails}
+                    className="text-zinc-600 hover:text-violet-400 opacity-0 group-hover/title:opacity-100 transition-opacity ml-1"
+                    title="Edit key result"
+                  >
+                    <EditIcon />
+                  </button>
+                </span>
+              )}
           </div>
           <span className="text-xs font-mono text-zinc-500 mt-1 whitespace-nowrap">
             {isWinCondition ? `${kr.current} ${kr.unit}` : `${kr.current} / ${kr.target} ${kr.unit}`}
           </span>
         </div>
-        {!isWinCondition && (
+        {!isWinCondition && !isEditingDetails && (
           <div className="flex items-center gap-3">
                <div className={`h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden`}>
                   <div
@@ -105,19 +194,27 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
         )}
       </div>
 
-      {isEditing && (
+      {isExpanded && (
         <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-1 duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
           <div className="border-t border-zinc-800 pt-4 flex flex-col gap-5">
             <div className="flex items-center justify-between">
                <label className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
                    {isWinCondition ? 'Log Progress' : 'Update Metrics'}
                </label>
-               <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="text-zinc-600 hover:text-red-400 text-xs transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-zinc-800"
-               >
-                 <TrashIcon /> Delete
-               </button>
+               <div className="flex items-center gap-2">
+                 <button
+                  onClick={handleStartEditDetails}
+                  className="text-zinc-600 hover:text-violet-400 text-xs transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-zinc-800"
+                 >
+                   <EditIcon /> Edit
+                 </button>
+                 <button
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  className="text-zinc-600 hover:text-red-400 text-xs transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-zinc-800"
+                 >
+                   <TrashIcon /> Delete
+                 </button>
+               </div>
             </div>
 
             {isWinCondition ? (
