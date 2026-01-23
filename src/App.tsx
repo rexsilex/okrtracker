@@ -322,7 +322,7 @@ const App = () => {
       <main className="w-full max-w-[1600px] mx-auto px-4 md:px-8 py-8">
 
         {view === 'dashboard' && (
-            <DashboardView objectives={[...okrs, ...goals]} />
+            <DashboardView objectives={[...okrs, ...goals]} onObjectiveClick={setSelectedObjectiveId} />
         )}
 
         {view === 'okrs' && (
