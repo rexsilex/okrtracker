@@ -1,7 +1,86 @@
 import React from 'react';
-import { Objective } from '../../types';
+import { Objective, WinLog } from '../../types';
 import { ProgressBar } from '../ui/SharedComponents';
 import { TrophyIcon, TargetIcon } from '../icons';
+
+// Sparkline component for showing cumulative wins over a year
+const WinsSparkline: React.FC<{ wins: WinLog[]; className?: string }> = ({ wins, className = '' }) => {
+    const width = 80;
+    const height = 24;
+    const padding = 2;
+
+    // Get year boundaries
+    const now = new Date();
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const yearEnd = new Date(now.getFullYear(), 11, 31);
+    const totalDays = Math.ceil((yearEnd.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Sort wins by date and calculate cumulative count per day
+    const winsByDate = wins
+        .map(w => new Date(w.date))
+        .filter(d => d.getFullYear() === now.getFullYear())
+        .sort((a, b) => a.getTime() - b.getTime());
+
+    if (winsByDate.length === 0) {
+        // No wins this year - show flat line at zero
+        return (
+            <svg width={width} height={height} className={className}>
+                <line
+                    x1={padding}
+                    y1={height - padding}
+                    x2={width - padding}
+                    y2={height - padding}
+                    stroke="rgb(63, 63, 70)"
+                    strokeWidth="1"
+                />
+            </svg>
+        );
+    }
+
+    // Build cumulative data points
+    const dataPoints: { day: number; count: number }[] = [];
+    let cumulative = 0;
+
+    // Start at 0
+    dataPoints.push({ day: 0, count: 0 });
+
+    // Add a point for each win
+    winsByDate.forEach(date => {
+        const dayOfYear = Math.ceil((date.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24));
+        cumulative++;
+        dataPoints.push({ day: dayOfYear, count: cumulative });
+    });
+
+    // Extend line to current day
+    const currentDay = Math.ceil((now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24));
+    if (dataPoints[dataPoints.length - 1].day < currentDay) {
+        dataPoints.push({ day: currentDay, count: cumulative });
+    }
+
+    const maxCount = cumulative;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+
+    // Scale points to SVG coordinates
+    const points = dataPoints.map(p => ({
+        x: padding + (p.day / totalDays) * chartWidth,
+        y: height - padding - (maxCount > 0 ? (p.count / maxCount) * chartHeight : 0)
+    }));
+
+    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+    // Create fill area path
+    const fillD = pathD + ` L ${points[points.length - 1].x} ${height - padding} L ${padding} ${height - padding} Z`;
+
+    return (
+        <svg width={width} height={height} className={className}>
+            {/* Fill area */}
+            <path d={fillD} fill="rgb(234, 179, 8)" fillOpacity="0.15" />
+            {/* Line */}
+            <path d={pathD} fill="none" stroke="rgb(234, 179, 8)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+};
 
 interface DashboardViewProps {
     objectives: Objective[];
@@ -29,8 +108,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ objectives, onObje
     const categoryStats = categories.map(cat => {
         const catObjs = objectives.filter(o => o.category === cat);
         const count = catObjs.length;
-        const wins = catObjs.reduce((acc, o) => acc + (o.wins?.length || 0) + o.keyResults.reduce((ka, k) => ka + (k.winLog?.length || 0), 0), 0);
-        return { cat, count, wins };
+
+        // Collect all wins with their full data for sparkline
+        const allWins: WinLog[] = catObjs.flatMap(o => [
+            ...(o.wins || []),
+            ...o.keyResults.flatMap(kr => kr.winLog || [])
+        ]);
+        const winsCount = allWins.length;
+
+        // Calculate progress for this category (only metric KRs, not win_conditions)
+        const catKRs = catObjs.flatMap(o => o.keyResults.filter(kr => kr.type !== 'win_condition'));
+        const progress = catKRs.length === 0
+            ? 0
+            : catKRs.reduce((acc, kr) => acc + (kr.target === 0 ? 0 : Math.min(100, (kr.current / kr.target) * 100)), 0) / catKRs.length;
+
+        return { cat, count, wins: winsCount, allWins, progress };
     });
 
     return (
@@ -75,15 +167,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ objectives, onObje
                     <div
                         key={stat.cat}
                         onClick={() => onCategoryClick?.(stat.cat)}
-                        className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-xl flex items-center justify-between cursor-pointer hover:bg-zinc-800/50 hover:border-zinc-700/50 transition-colors"
+                        className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-xl cursor-pointer hover:bg-zinc-800/50 hover:border-zinc-700/50 transition-colors"
                     >
-                         <div>
-                             <div className="text-sm font-bold text-white mb-1">{stat.cat}</div>
-                             <div className="text-xs text-zinc-500">{stat.count} Objectives</div>
+                         <div className="flex items-center justify-between mb-3">
+                             <div>
+                                 <div className="text-sm font-bold text-white mb-0.5">{stat.cat}</div>
+                                 <div className="text-xs text-zinc-500">{stat.count} Objectives</div>
+                             </div>
+                             <div className="flex flex-col items-end">
+                                 <div className="text-lg font-bold text-zinc-200">{stat.wins}</div>
+                                 <div className="text-[10px] text-zinc-600 uppercase font-bold tracking-wider">Wins</div>
+                             </div>
                          </div>
-                         <div className="flex flex-col items-end">
-                             <div className="text-xl font-bold text-zinc-200">{stat.wins}</div>
-                             <div className="text-[10px] text-zinc-600 uppercase font-bold tracking-wider">Wins</div>
+                         {/* Progress bar */}
+                         <div className="mb-3">
+                             <div className="flex items-center justify-between mb-1">
+                                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Progress</span>
+                                 <span className="text-[10px] font-mono text-zinc-400">{Math.round(stat.progress)}%</span>
+                             </div>
+                             <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                 <div
+                                     className={`h-full transition-all ${stat.progress >= 100 ? 'bg-green-500' : 'bg-violet-500'}`}
+                                     style={{ width: `${Math.min(100, stat.progress)}%` }}
+                                 />
+                             </div>
+                         </div>
+                         {/* Wins sparkline */}
+                         <div className="flex items-center justify-between">
+                             <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Wins this year</span>
+                             <WinsSparkline wins={stat.allWins} />
                          </div>
                     </div>
                 ))}
