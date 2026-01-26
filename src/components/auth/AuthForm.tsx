@@ -19,19 +19,26 @@ export const AuthForm: React.FC = () => {
     setLoading(true);
     setMessage(null);
 
+    // Must redirect to /dashboard directly to avoid React Router stripping query params
+    const redirectUrl = `${window.location.origin}/dashboard`;
+    console.log('OAuth redirectTo:', redirectUrl);
+    localStorage.setItem('auth_debug', JSON.stringify([`Starting OAuth with redirectTo: ${redirectUrl}`]));
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: redirectUrl,
           queryParams: {
             hd: ALLOWED_DOMAINS[0], // Hint for Google to show domain accounts
           },
         },
       });
 
+      console.log('OAuth response:', { data, error });
       if (error) throw error;
     } catch (error: any) {
+      console.error('OAuth error:', error);
       setMessage({
         type: 'error',
         text: error.message || 'An error occurred',
