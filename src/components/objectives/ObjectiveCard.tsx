@@ -42,7 +42,7 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
   return (
     <div
         onClick={onClick}
-        className={`bg-zinc-900 border ${isCompany ? 'border-violet-900/50 shadow-violet-900/10' : 'border-zinc-800'} rounded-xl mb-4 shadow-sm transition-all hover:border-zinc-600 cursor-pointer group relative`}
+        className={`bg-white dark:bg-zinc-900 border ${isCompany ? 'border-violet-300 dark:border-violet-900/50 shadow-violet-100 dark:shadow-violet-900/10' : 'border-zinc-200 dark:border-zinc-800'} rounded-xl mb-4 shadow-sm transition-all hover:border-zinc-400 dark:hover:border-zinc-600 cursor-pointer group relative`}
     >
       {isCompany && (
           <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-violet-500 to-violet-700"></div>
@@ -51,7 +51,7 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
         {/* Drag Handle */}
         <div
           {...dragHandleProps}
-          className="flex items-center justify-center w-8 text-zinc-700 hover:text-zinc-500 cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
+          className="flex items-center justify-center w-8 text-zinc-300 dark:text-zinc-700 hover:text-zinc-500 cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
         >
           <GripVerticalIcon />
         </div>
@@ -60,15 +60,15 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
             <div className="flex-1 pr-4">
                 <div className="flex items-center gap-2 mb-2">
                     {objective.category && (
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isCompany ? 'bg-violet-900/30 text-violet-400 border border-violet-800/50' : 'bg-zinc-800 text-zinc-500 border border-zinc-700/50'}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isCompany ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800/50' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700/50'}`}>
                             {objective.category}
                         </span>
                     )}
                     {objective.status && (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                            objective.status === 'on_track' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-800/50' :
-                            objective.status === 'at_risk' ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' :
-                            'bg-zinc-800 text-zinc-500 border border-zinc-700/50'
+                            objective.status === 'on_track' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50' :
+                            objective.status === 'at_risk' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50' :
+                            'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700/50'
                         }`}>
                             {objective.status === 'on_track' ? 'On Track' : objective.status === 'at_risk' ? 'At Risk' : 'New'}
                         </span>
@@ -77,15 +77,15 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
                 <div className="flex items-start gap-2">
                     {objective.description && (
                         <div className="relative group/info shrink-0">
-                            <div className="p-1 text-zinc-600 hover:text-zinc-400 transition-colors cursor-help">
+                            <div className="p-1 text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors cursor-help">
                                 <InfoIcon />
                             </div>
-                            <div className="absolute left-0 top-6 w-96 max-w-[90vw] p-3 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl text-xs text-zinc-400 z-50 hidden group-hover/info:block animate-in fade-in zoom-in-95 pointer-events-none whitespace-normal">
+                            <div className="absolute left-0 top-6 w-96 max-w-[90vw] p-3 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl text-xs text-zinc-600 dark:text-zinc-400 z-50 hidden group-hover/info:block animate-in fade-in zoom-in-95 pointer-events-none whitespace-normal">
                                 {objective.description}
                             </div>
                         </div>
                     )}
-                     <h3 className="text-lg font-medium text-zinc-100 leading-snug group-hover:text-white transition-colors flex-1">
+                     <h3 className="text-lg font-medium text-zinc-800 dark:text-zinc-100 leading-snug group-hover:text-zinc-900 dark:group-hover:text-white transition-colors flex-1">
                         {objective.title}
                     </h3>
                 </div>
@@ -93,7 +93,7 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
 
             {/* Top Right Stats */}
             <div className="flex flex-col items-end gap-2 shrink-0">
-                <div className="flex items-center gap-1.5 bg-zinc-800 text-zinc-400 px-2 py-1 rounded text-xs font-bold border border-zinc-700/50">
+                <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2 py-1 rounded text-xs font-bold border border-zinc-200 dark:border-zinc-700/50">
                      <TrophyIcon /> {totalWins}
                 </div>
             </div>
@@ -103,7 +103,7 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
              <div className="flex-1">
                 <ProgressBar progress={totalProgress} className="h-1.5" />
              </div>
-             <span className={`text-xs font-bold font-mono ${totalProgress >= 100 ? 'text-violet-400' : 'text-zinc-500'}`}>
+             <span className={`text-xs font-bold font-mono ${totalProgress >= 100 ? 'text-violet-600 dark:text-violet-400' : 'text-zinc-500'}`}>
                 {Math.round(totalProgress)}%
              </span>
         </div>
@@ -120,7 +120,7 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
                          <Avatar key={p.id} person={p} size="xs" />
                      ))}
                      {contributors.length > 5 && (
-                         <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-900 text-[8px] flex items-center justify-center text-zinc-400 font-bold">
+                         <div className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-white dark:border-zinc-900 text-[8px] flex items-center justify-center text-zinc-500 dark:text-zinc-400 font-bold">
                              +{contributors.length - 5}
                          </div>
                      )}

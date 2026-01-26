@@ -55,7 +55,7 @@ const SortableKeyResult: React.FC<SortableKeyResultProps> = ({ kr, onUpdate, onD
         <div ref={setNodeRef} style={style} {...attributes} className="relative">
             <div
                 {...listeners}
-                className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center text-zinc-700 hover:text-zinc-400 cursor-grab active:cursor-grabbing z-10"
+                className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center text-zinc-300 dark:text-zinc-700 hover:text-zinc-500 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing z-10"
             >
                 <GripVerticalIcon />
             </div>
@@ -99,10 +99,10 @@ const SortableInitiative: React.FC<SortableInitiativeProps> = ({ id, index, text
     };
 
     return (
-        <li ref={setNodeRef} style={style} {...attributes} className="text-sm text-zinc-300 flex items-start gap-2.5 p-2 rounded bg-zinc-800/30 group">
+        <li ref={setNodeRef} style={style} {...attributes} className="text-sm text-zinc-700 dark:text-zinc-300 flex items-start gap-2.5 p-2 rounded bg-zinc-100/30 dark:bg-zinc-800/30 group">
             <div
                 {...listeners}
-                className="text-zinc-600 hover:text-zinc-400 cursor-grab active:cursor-grabbing mt-0.5"
+                className="text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing mt-0.5"
             >
                 <GripVerticalIcon />
             </div>
@@ -114,7 +114,7 @@ const SortableInitiative: React.FC<SortableInitiativeProps> = ({ id, index, text
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 mt-1"
+                        className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-500 dark:hover:text-violet-300 flex items-center gap-1 mt-1"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <LinkIcon /> {url}
@@ -123,7 +123,7 @@ const SortableInitiative: React.FC<SortableInitiativeProps> = ({ id, index, text
             </div>
             <button
                 onClick={onRemove}
-                className="text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="text-zinc-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
             >
                 <XIcon />
             </button>
@@ -490,26 +490,26 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
     };
 
     return (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full h-full flex flex-col overflow-hidden shadow-2xl relative">
+        <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full h-full flex flex-col overflow-hidden shadow-2xl relative">
             {/* Header / Nav Bar */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
                 <div className="flex items-center gap-4">
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-white transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
                         <CloseIcon />
                     </button>
-                    <div className="h-6 w-px bg-zinc-800"></div>
+                    <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800"></div>
                     <div className="flex gap-2">
                         <button
                             onClick={onPrev}
                             disabled={!hasPrev}
-                            className={`p-2 rounded-lg transition-colors ${hasPrev ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' : 'text-zinc-800 cursor-not-allowed'}`}
+                            className={`p-2 rounded-lg transition-colors ${hasPrev ? 'hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white' : 'text-zinc-300 dark:text-zinc-800 cursor-not-allowed'}`}
                         >
                             <ChevronLeft />
                         </button>
                         <button
                             onClick={onNext}
                             disabled={!hasNext}
-                            className={`p-2 rounded-lg transition-colors ${hasNext ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' : 'text-zinc-800 cursor-not-allowed'}`}
+                            className={`p-2 rounded-lg transition-colors ${hasNext ? 'hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white' : 'text-zinc-300 dark:text-zinc-800 cursor-not-allowed'}`}
                         >
                             <ChevronRight />
                         </button>
@@ -520,10 +520,10 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setShowWinsDrawer(true)}
-                        className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 hover:bg-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
                     >
                         <span className="text-xs text-zinc-500 uppercase font-bold">Total Wins</span>
-                        <span className="text-yellow-500 font-bold flex items-center gap-1">
+                        <span className="text-yellow-600 dark:text-yellow-500 font-bold flex items-center gap-1">
                              <TrophyIcon /> {totalWins}
                         </span>
                     </button>
@@ -534,7 +534,7 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                             message: `Are you sure you want to delete "${objective.title}"? This will also delete all key results, wins, and initiatives associated with it. This action cannot be undone.`,
                             onConfirm: onDelete
                         })}
-                        className="text-zinc-600 hover:text-red-500 transition-colors p-2"
+                        className="text-zinc-400 dark:text-zinc-600 hover:text-red-500 transition-colors p-2"
                         title="Delete Objective"
                     >
                         <TrashIcon />
@@ -545,12 +545,12 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
             {/* Main Content Grid */}
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
                 {/* LEFT COLUMN: Context & Direct Wins */}
-                <div className="lg:w-1/3 lg:border-r border-zinc-800 flex flex-col bg-zinc-900/10 overflow-y-auto">
+                <div className="lg:w-1/3 lg:border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-zinc-50/50 dark:bg-zinc-900/10 overflow-y-auto">
                     <div className="p-8">
                         {/* Meta Tags */}
                         <div className="flex gap-2 mb-4 flex-wrap">
                             {objective.category && (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-300/50 dark:border-zinc-700/50">
                                     {objective.category}
                                 </span>
                             )}
@@ -569,10 +569,10 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                 }}
                                 className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider border cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500/50 ${
                                     objective.status === 'on_track'
-                                        ? 'bg-emerald-900/30 text-emerald-400 border-emerald-700/50'
+                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-300/50 dark:border-emerald-700/50'
                                         : objective.status === 'at_risk'
-                                        ? 'bg-red-900/30 text-red-400 border-red-700/50'
-                                        : 'bg-blue-900/30 text-blue-400 border-blue-700/50'
+                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-300/50 dark:border-red-700/50'
+                                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-300/50 dark:border-blue-700/50'
                                 }`}
                             >
                                 <option value="new">New</option>
@@ -589,7 +589,7 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                         type="text"
                                         value={editedTitle}
                                         onChange={(e) => setEditedTitle(e.target.value)}
-                                        className="text-2xl md:text-3xl font-bold text-white bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500/50"
+                                        className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500/50"
                                         autoFocus
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') handleSaveTitle();
@@ -605,7 +605,7 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                         </button>
                                         <button
                                             onClick={handleCancelTitle}
-                                            className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs rounded-lg flex items-center gap-1 transition-colors"
+                                            className="px-3 py-1 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs rounded-lg flex items-center gap-1 transition-colors"
                                         >
                                             <XIcon /> Cancel
                                         </button>
@@ -613,10 +613,10 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                 </div>
                             ) : (
                                 <div className="flex items-start gap-2 group">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight flex-1">{objective.title}</h2>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white leading-tight flex-1">{objective.title}</h2>
                                     <button
                                         onClick={() => setIsEditingTitle(true)}
-                                        className="text-zinc-600 hover:text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity p-1 mt-1"
+                                        className="text-zinc-400 dark:text-zinc-600 hover:text-violet-600 dark:hover:text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity p-1 mt-1"
                                         title="Edit title"
                                     >
                                         <EditIcon />
@@ -626,10 +626,10 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                         </div>
 
                         {/* Progress */}
-                         <div className="mb-8 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                         <div className="mb-8 bg-zinc-100/50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50">
                             <div className="flex justify-between items-end mb-2">
                                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Overall Progress</span>
-                                <span className="text-2xl font-bold font-mono text-white">{Math.round(totalProgress)}%</span>
+                                <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-white">{Math.round(totalProgress)}%</span>
                             </div>
                             <ProgressBar progress={totalProgress} className="h-3" />
                         </div>
@@ -642,7 +642,7 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                     <textarea
                                         value={editedDescription}
                                         onChange={(e) => setEditedDescription(e.target.value)}
-                                        className="text-sm text-white bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500/50 min-h-[80px]"
+                                        className="text-sm text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500/50 min-h-[80px]"
                                         placeholder="Add a description..."
                                         autoFocus
                                     />
@@ -655,7 +655,7 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                         </button>
                                         <button
                                             onClick={handleCancelDescription}
-                                            className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs rounded-lg flex items-center gap-1 transition-colors"
+                                            className="px-3 py-1 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs rounded-lg flex items-center gap-1 transition-colors"
                                         >
                                             <XIcon /> Cancel
                                         </button>
@@ -663,12 +663,12 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                                 </div>
                             ) : (
                                 <div className="flex items-start gap-2 group">
-                                    <p className="text-zinc-400 text-sm leading-relaxed flex-1">
-                                        {objective.description || <span className="text-zinc-600 italic">No description yet</span>}
+                                    <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed flex-1">
+                                        {objective.description || <span className="text-zinc-400 dark:text-zinc-600 italic">No description yet</span>}
                                     </p>
                                     <button
                                         onClick={() => setIsEditingDescription(true)}
-                                        className="text-zinc-600 hover:text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                        className="text-zinc-400 dark:text-zinc-600 hover:text-violet-600 dark:hover:text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
                                         title="Edit description"
                                     >
                                         <EditIcon />
@@ -822,28 +822,28 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                 </div>
 
                 {/* RIGHT COLUMN: Key Results */}
-                <div className="lg:w-2/3 flex flex-col bg-zinc-950 overflow-y-auto">
+                <div className="lg:w-2/3 flex flex-col bg-white dark:bg-zinc-950 overflow-y-auto">
                     <div className="p-8">
-                         <div className="flex items-center justify-between mb-6 sticky top-0 bg-zinc-950 z-10 py-2 border-b border-zinc-900 backdrop-blur-sm bg-zinc-950/90">
+                         <div className="flex items-center justify-between mb-6 sticky top-0 bg-white dark:bg-zinc-950 z-10 py-2 border-b border-zinc-100 dark:border-zinc-900 backdrop-blur-sm bg-white/90 dark:bg-zinc-950/90">
                             <div className="flex items-center gap-6">
-                                <h3 className="text-lg font-semibold text-zinc-200">Key Results</h3>
+                                <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-200">Key Results</h3>
                                 {/* Tabs */}
-                                <div className="flex p-1 bg-zinc-900 rounded-lg border border-zinc-800">
+                                <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
                                     <button
                                         onClick={() => setActiveKrTab('all')}
-                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeKrTab === 'all' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeKrTab === 'all' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                                     >
                                         All
                                     </button>
                                     <button
                                         onClick={() => setActiveKrTab('metrics')}
-                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeKrTab === 'metrics' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeKrTab === 'metrics' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                                     >
                                         Metrics
                                     </button>
                                      <button
                                         onClick={() => setActiveKrTab('conditions')}
-                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeKrTab === 'conditions' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeKrTab === 'conditions' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                                     >
                                         Win Conditions
                                     </button>
@@ -852,13 +852,13 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={onStartAddMetric}
-                                    className="text-sm bg-zinc-900 hover:bg-zinc-800 text-violet-400 font-medium flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border border-zinc-800 shadow-sm"
+                                    className="text-sm bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-violet-600 dark:text-violet-400 font-medium flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border border-zinc-200 dark:border-zinc-800 shadow-sm"
                                 >
                                     <PlusIcon /> Add Metric
                                 </button>
                                 <button
                                     onClick={onStartAddCondition}
-                                    className="text-sm bg-zinc-900 hover:bg-zinc-800 text-pink-400 font-medium flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border border-zinc-800 shadow-sm"
+                                    className="text-sm bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-pink-600 dark:text-pink-400 font-medium flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border border-zinc-200 dark:border-zinc-800 shadow-sm"
                                 >
                                     <PlusIcon /> Add Win Condition
                                 </button>
@@ -952,12 +952,12 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
                         >
                             <div className="space-y-3 pb-8">
                                 {objective.keyResults.length === 0 ? (
-                                    <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-2xl bg-zinc-900/20">
-                                        <span className="text-zinc-600 text-sm">No key results yet. Add metrics or win conditions.</span>
+                                    <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-zinc-900 rounded-2xl bg-zinc-50/20 dark:bg-zinc-900/20">
+                                        <span className="text-zinc-500 dark:text-zinc-600 text-sm">No key results yet. Add metrics or win conditions.</span>
                                     </div>
                                 ) : filteredKRs.length === 0 ? (
-                                    <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-2xl bg-zinc-900/20">
-                                        <span className="text-zinc-600 text-sm">No {activeKrTab === 'metrics' ? 'metrics' : 'win conditions'} found for this objective.</span>
+                                    <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-zinc-900 rounded-2xl bg-zinc-50/20 dark:bg-zinc-900/20">
+                                        <span className="text-zinc-500 dark:text-zinc-600 text-sm">No {activeKrTab === 'metrics' ? 'metrics' : 'win conditions'} found for this objective.</span>
                                     </div>
                                 ) : (
                                     <SortableContext items={filteredKRs.map(kr => kr.id)} strategy={verticalListSortingStrategy}>

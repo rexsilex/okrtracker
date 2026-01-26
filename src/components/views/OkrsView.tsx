@@ -182,8 +182,8 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
                         onClick={() => setActiveTab(cat)}
                         className={`whitespace-nowrap px-4 py-1.5 text-xs font-medium rounded-full transition-all border ${
                             activeTab === cat
-                            ? 'bg-zinc-100 text-zinc-900 border-zinc-100'
-                            : 'bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
+                            ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
+                            : 'bg-white/50 dark:bg-zinc-900/50 text-zinc-500 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-700 dark:hover:text-zinc-300'
                         }`}
                     >
                         {cat}
@@ -199,7 +199,7 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
 
             {/* Add Form */}
             {isAddingObj && (
-                <div className="max-w-4xl mx-auto mb-8 bg-zinc-900 border border-zinc-800 rounded-xl p-6 animate-in fade-in slide-in-from-top-4">
+                <div className="max-w-4xl mx-auto mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 animate-in fade-in slide-in-from-top-4">
                     <form onSubmit={handleAddObjective}>
                         <div className="flex flex-col md:flex-row gap-4 mb-4">
                             <div className="flex-1">
@@ -209,7 +209,7 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
                                     placeholder="e.g., Increase brand awareness"
                                     value={newObjTitle}
                                     onChange={(e) => setNewObjTitle(e.target.value)}
-                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all text-sm"
+                                    className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2.5 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all text-sm"
                                     autoFocus
                                 />
                             </div>
@@ -220,7 +220,7 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
                                     placeholder="Engineering"
                                     value={newObjCategory}
                                     onChange={(e) => setNewObjCategory(e.target.value)}
-                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all text-sm"
+                                    className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2.5 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all text-sm"
                                     list="categories"
                                 />
                                 <datalist id="categories">
@@ -233,7 +233,7 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setIsAddingObj(false)}
-                                className="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-white transition-colors"
+                                className="px-4 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                             >
                                 Cancel
                             </button>
@@ -256,12 +256,12 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
             >
                 <div className="space-y-1 max-w-5xl mx-auto">
                     {filteredObjectives.length === 0 && !isAddingObj ? (
-                        <div className="text-center py-20 border border-dashed border-zinc-800 rounded-xl">
-                            <div className="bg-zinc-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-700">
+                        <div className="text-center py-20 border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl">
+                            <div className="bg-zinc-100 dark:bg-zinc-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-400 dark:text-zinc-700">
                                 <TargetIcon />
                             </div>
-                            <h3 className="text-zinc-400 font-medium mb-1">No Objectives found</h3>
-                            <p className="text-zinc-600 text-sm">Try changing the filter or create a new goal.</p>
+                            <h3 className="text-zinc-500 dark:text-zinc-400 font-medium mb-1">No Objectives found</h3>
+                            <p className="text-zinc-400 dark:text-zinc-600 text-sm">Try changing the filter or create a new goal.</p>
                         </div>
                     ) : (
                         <div className="grid gap-4">
@@ -273,9 +273,9 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
                                 {activeTab === "All" && objectives.some((o: Objective) => o.category === "Company") && (
                                     <div className="mb-6">
                                     <div className="flex items-center gap-3 mb-4">
-                                            <div className="h-px bg-zinc-800 flex-1"></div>
-                                            <span className="text-xs font-bold text-violet-500 uppercase tracking-widest">Company Priorities</span>
-                                            <div className="h-px bg-zinc-800 flex-1"></div>
+                                            <div className="h-px bg-zinc-200 dark:bg-zinc-800 flex-1"></div>
+                                            <span className="text-xs font-bold text-violet-600 dark:text-violet-500 uppercase tracking-widest">Company Priorities</span>
+                                            <div className="h-px bg-zinc-200 dark:bg-zinc-800 flex-1"></div>
                                     </div>
                                         {objectives.filter((o: Objective) => o.category === "Company").map((obj: Objective) => (
                                             <SortableObjectiveCard
@@ -287,9 +287,9 @@ export const OkrsView: React.FC<OkrsViewProps> = ({
                                         ))}
 
                                     <div className="flex items-center gap-3 mb-4 mt-10">
-                                            <div className="h-px bg-zinc-800 flex-1"></div>
-                                            <span className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Department Objectives</span>
-                                            <div className="h-px bg-zinc-800 flex-1"></div>
+                                            <div className="h-px bg-zinc-200 dark:bg-zinc-800 flex-1"></div>
+                                            <span className="text-xs font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">Department Objectives</span>
+                                            <div className="h-px bg-zinc-200 dark:bg-zinc-800 flex-1"></div>
                                     </div>
                                     </div>
                                 )}

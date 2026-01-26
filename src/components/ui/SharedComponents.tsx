@@ -3,7 +3,7 @@ import { KeyResultType, Person } from '../../types';
 import { SwapIcon } from '../icons';
 
 export const ProgressBar = ({ progress, className = "" }: { progress: number; className?: string }) => (
-  <div className={`h-2 w-full bg-zinc-800 rounded-full overflow-hidden ${className}`}>
+  <div className={`h-2 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden ${className}`}>
     <div
       className="h-full bg-violet-500 transition-all duration-500 ease-out"
       style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
@@ -85,7 +85,7 @@ export const Avatar: React.FC<{ person?: Person; size?: 'xs' | 'sm' | 'md' }> = 
     };
     return (
         <div
-            className={`${sizeClasses[size]} rounded-full ${person.color} flex items-center justify-center text-white font-bold border border-zinc-900 shadow-sm shrink-0`}
+            className={`${sizeClasses[size]} rounded-full ${person.color} flex items-center justify-center text-white font-bold border border-white dark:border-zinc-900 shadow-sm shrink-0`}
             title={person.name}
         >
             {person.initials}

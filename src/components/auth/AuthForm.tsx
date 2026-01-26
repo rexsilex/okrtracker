@@ -92,19 +92,19 @@ export const AuthForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl"></div>
-            <h1 className="text-3xl font-bold text-white">OKR Tracker</h1>
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">OKR Tracker</h1>
           </div>
 
           {/* Form */}
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-2">
+              <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
                 Email
               </label>
               <input
@@ -112,13 +112,13 @@ export const AuthForm: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-violet-500"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-2">
+              <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
                 Password
               </label>
               <input
@@ -127,7 +127,7 @@ export const AuthForm: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-lg px-4 py-3 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-violet-500"
                 placeholder="••••••••"
               />
             </div>
@@ -136,8 +136,8 @@ export const AuthForm: React.FC = () => {
               <div
                 className={`p-3 rounded-lg text-sm ${
                   message.type === 'error'
-                    ? 'bg-red-900/20 border border-red-500/50 text-red-400'
-                    : 'bg-emerald-900/20 border border-emerald-500/50 text-emerald-400'
+                    ? 'bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-500/50 text-red-600 dark:text-red-400'
+                    : 'bg-emerald-100 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-500/50 text-emerald-600 dark:text-emerald-400'
                 }`}
               >
                 {message.text}
@@ -147,17 +147,17 @@ export const AuthForm: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white font-medium py-3 rounded-lg transition-colors"
+              className="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-200 dark:disabled:bg-zinc-800 disabled:text-zinc-400 dark:disabled:text-zinc-600 text-white font-medium py-3 rounded-lg transition-colors"
             >
               {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
             </button>
 
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-700"></div>
+                <div className="w-full border-t border-zinc-200 dark:border-zinc-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-zinc-900 text-zinc-500">or</span>
+                <span className="px-2 bg-white dark:bg-zinc-900 text-zinc-500">or</span>
               </div>
             </div>
 
@@ -165,7 +165,7 @@ export const AuthForm: React.FC = () => {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full bg-white hover:bg-zinc-100 disabled:bg-zinc-300 text-zinc-900 font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-3"
+              className="w-full bg-zinc-100 dark:bg-white hover:bg-zinc-200 dark:hover:bg-zinc-100 disabled:bg-zinc-200 dark:disabled:bg-zinc-300 text-zinc-900 font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-3 border border-zinc-200 dark:border-transparent"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -196,7 +196,7 @@ export const AuthForm: React.FC = () => {
                 setIsSignUp(!isSignUp);
                 setMessage(null);
               }}
-              className="text-sm text-zinc-400 hover:text-white transition-colors"
+              className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
             >
               {isSignUp
                 ? 'Already have an account? Sign in'
@@ -205,7 +205,7 @@ export const AuthForm: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-center text-zinc-600 text-sm mt-6">
+        <p className="text-center text-zinc-400 dark:text-zinc-600 text-sm mt-6">
           Secure authentication powered by Supabase
         </p>
       </div>

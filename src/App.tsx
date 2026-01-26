@@ -12,6 +12,7 @@ import { GoalsView } from './components/views/GoalsView';
 import { WinsFeedView } from './components/views/WinsFeedView';
 import { SettingsView } from './components/views/SettingsView';
 import { AuthForm } from './components/auth/AuthForm';
+import { ThemeProvider } from './contexts/ThemeContext';
 import * as api from './lib/api';
 
 // Main app content with routing
@@ -307,8 +308,8 @@ const AppContent = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="text-zinc-400">Loading...</div>
+      <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="text-zinc-500 dark:text-zinc-400">Loading...</div>
       </div>
     );
   }
@@ -327,14 +328,14 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200">
+    <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200">
 
       {/* Top Bar / Main Navigation */}
-      <div className="sticky top-0 z-10 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
+      <div className="sticky top-0 z-10 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
           <div className="w-full max-w-[1600px] mx-auto px-6">
               <div className="flex items-center justify-between h-16">
                   <div className="flex items-center gap-12">
-                      <div className="font-bold text-white tracking-tight flex items-center gap-2 text-lg">
+                      <div className="font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2 text-lg">
                          <img src="/logo.png" alt="Frequency" className="h-7 w-auto" />
                       </div>
 
@@ -342,31 +343,31 @@ const AppContent = () => {
                       <nav className="hidden md:flex items-center gap-6">
                           <Link
                             to="/dashboard"
-                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'dashboard' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'dashboard' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                           >
                              <LayoutDashboardIcon /> Dashboard
                           </Link>
                           <Link
                             to="/okrs"
-                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'okrs' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'okrs' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                           >
                              <TargetIcon /> OKRs
                           </Link>
                           <Link
                             to="/goals"
-                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'goals' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'goals' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                           >
                              <TargetIcon /> Goals
                           </Link>
                           <Link
                             to="/wins"
-                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'wins' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'wins' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                           >
                              <TrophyIcon /> Wins
                           </Link>
                           <Link
                             to="/settings"
-                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'settings' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${view === 'settings' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}
                           >
                              <SettingsIcon /> Settings
                           </Link>
@@ -377,7 +378,7 @@ const AppContent = () => {
                       <span className="text-xs text-zinc-500">{session.user.email}</span>
                       <button
                         onClick={handleSignOut}
-                        className="text-xs text-zinc-500 hover:text-white px-3 py-2 rounded-lg transition-colors"
+                        className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white px-3 py-2 rounded-lg transition-colors"
                       >
                         Sign Out
                       </button>
@@ -564,13 +565,13 @@ const AuthCallback = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="text-red-400 text-center">
+      <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="text-red-500 dark:text-red-400 text-center">
           <p className="text-lg mb-4">Authentication Error</p>
           <p className="text-sm text-zinc-500">{error}</p>
           <button
             onClick={() => navigate('/', { replace: true })}
-            className="mt-4 px-4 py-2 bg-zinc-800 rounded hover:bg-zinc-700"
+            className="mt-4 px-4 py-2 bg-zinc-200 dark:bg-zinc-800 rounded hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200"
           >
             Back to Login
           </button>
@@ -580,8 +581,8 @@ const AuthCallback = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-      <div className="text-zinc-400">Completing sign in...</div>
+    <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center">
+      <div className="text-zinc-500 dark:text-zinc-400">Completing sign in...</div>
     </div>
   );
 };
@@ -589,20 +590,22 @@ const AuthCallback = () => {
 // Root App component with router
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AppContent />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/dashboard" element={<AppContent />} />
-        <Route path="/okrs" element={<AppContent />} />
-        <Route path="/okrs/:id" element={<AppContent />} />
-        <Route path="/goals" element={<AppContent />} />
-        <Route path="/goals/:id" element={<AppContent />} />
-        <Route path="/wins" element={<AppContent />} />
-        <Route path="/settings" element={<AppContent />} />
-        <Route path="*" element={<AppContent />} />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AppContent />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/dashboard" element={<AppContent />} />
+          <Route path="/okrs" element={<AppContent />} />
+          <Route path="/okrs/:id" element={<AppContent />} />
+          <Route path="/goals" element={<AppContent />} />
+          <Route path="/goals/:id" element={<AppContent />} />
+          <Route path="/wins" element={<AppContent />} />
+          <Route path="/settings" element={<AppContent />} />
+          <Route path="*" element={<AppContent />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 };
 
