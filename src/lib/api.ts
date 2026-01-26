@@ -1,6 +1,37 @@
 import { supabase } from './supabase';
 import { Objective, Person, KeyResult, WinLog, ObjectiveType, ObjectiveStatus } from '../types';
 
+// ==================== User ====================
+
+export const ensureUserExists = async (): Promise<string> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // Check if user exists in users table
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', user.id)
+    .single();
+
+  if (existingUser) {
+    return existingUser.id;
+  }
+
+  // Create user record
+  const { data: newUser, error } = await supabase
+    .from('users')
+    .insert({
+      id: user.id,
+      email: user.email
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return newUser.id;
+};
+
 // ==================== People ====================
 
 export const fetchPeople = async (): Promise<Person[]> => {
@@ -21,13 +52,13 @@ export const fetchPeople = async (): Promise<Person[]> => {
 };
 
 export const createPerson = async (person: Omit<Person, 'id'>): Promise<Person> => {
-  // Get the first user ID as a default (since data is shared)
-  const { data: users } = await supabase.from('users').select('id').limit(1).single();
+  // Ensure user exists and get their ID
+  const userId = await ensureUserExists();
 
   const { data, error } = await supabase
     .from('people')
     .insert({
-      user_id: users?.id || '00000000-0000-0000-0000-000000000001',
+      user_id: userId,
       name: person.name,
       initials: person.initials,
       color: person.color
@@ -110,8 +141,8 @@ export const fetchObjectives = async (type?: ObjectiveType): Promise<Objective[]
 };
 
 export const createObjective = async (objective: Omit<Objective, 'id' | 'keyResults' | 'wins'>): Promise<Objective> => {
-  // Get the first user ID as a default (since data is shared)
-  const { data: users } = await supabase.from('users').select('id').limit(1).single();
+  // Ensure user exists and get their ID
+  const userId = await ensureUserExists();
 
   // Get the highest order value to place new objective at the end (filter by type)
   const { data: maxOrderObj } = await supabase
@@ -128,7 +159,7 @@ export const createObjective = async (objective: Omit<Objective, 'id' | 'keyResu
   const { data, error } = await supabase
     .from('objectives')
     .insert({
-      user_id: users?.id || '00000000-0000-0000-0000-000000000001',
+      user_id: userId,
       title: objective.title,
       type: objective.type,
       status: 'new',
