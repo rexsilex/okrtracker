@@ -19,13 +19,10 @@ export const AuthForm: React.FC = () => {
     setLoading(true);
     setMessage(null);
 
-    // Redirect to /auth/callback to handle the OAuth code exchange
     const redirectUrl = `${window.location.origin}/auth/callback`;
-    console.log('OAuth redirectTo:', redirectUrl);
-    localStorage.setItem('auth_debug', JSON.stringify([`Starting OAuth with redirectTo: ${redirectUrl}`]));
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -35,10 +32,8 @@ export const AuthForm: React.FC = () => {
         },
       });
 
-      console.log('OAuth response:', { data, error });
       if (error) throw error;
     } catch (error: any) {
-      console.error('OAuth error:', error);
       setMessage({
         type: 'error',
         text: error.message || 'An error occurred',

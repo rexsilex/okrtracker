@@ -47,56 +47,13 @@ const AppContent = () => {
 
   // Check auth session on mount
   useEffect(() => {
-    // Handle OAuth callback - check for code in URL
-    const handleAuthCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const error_param = params.get('error');
-      const error_description = params.get('error_description');
-
-      // Store debug info in localStorage (survives redirects)
-      const debugInfo: string[] = JSON.parse(localStorage.getItem('auth_debug') || '[]');
-      debugInfo.push(`[${new Date().toISOString()}] URL: ${window.location.href}`);
-      debugInfo.push(`[${new Date().toISOString()}] code: ${code ? 'present' : 'missing'}, error: ${error_param || 'none'}`);
-
-      // Log OAuth errors from URL
-      if (error_param) {
-        debugInfo.push(`[${new Date().toISOString()}] OAuth error: ${error_param} - ${error_description}`);
-        localStorage.setItem('auth_debug', JSON.stringify(debugInfo.slice(-20)));
-        alert(`Auth error: ${error_description || error_param}`);
-      }
-
-      if (code) {
-        debugInfo.push(`[${new Date().toISOString()}] Exchanging code for session...`);
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          debugInfo.push(`[${new Date().toISOString()}] Exchange error: ${error.message}`);
-          localStorage.setItem('auth_debug', JSON.stringify(debugInfo.slice(-20)));
-          alert(`Session error: ${error.message}`);
-        } else {
-          debugInfo.push(`[${new Date().toISOString()}] Exchange successful`);
-        }
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
-      // Check for previous debug info
-      const prevDebug = localStorage.getItem('auth_debug');
-      if (prevDebug && !code && !error_param) {
-        console.log('Previous auth debug:', JSON.parse(prevDebug));
-      }
-
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        debugInfo.push(`[${new Date().toISOString()}] Session error: ${sessionError.message}`);
-      }
-      debugInfo.push(`[${new Date().toISOString()}] Session: ${session ? 'exists' : 'null'}`);
-      localStorage.setItem('auth_debug', JSON.stringify(debugInfo.slice(-20)));
-
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setLoading(false);
     };
 
-    handleAuthCallback();
+    checkSession();
 
     const {
       data: { subscription },
@@ -332,6 +289,11 @@ const AppContent = () => {
   // Show auth form if not authenticated
   if (!session) {
     return <AuthForm />;
+  }
+
+  // Redirect logged-in users from root to dashboard
+  if (location.pathname === '/') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
@@ -574,7 +536,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<AppContent />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={<AppContent />} />
         <Route path="/okrs" element={<AppContent />} />
@@ -582,7 +544,7 @@ const App = () => {
         <Route path="/goals" element={<AppContent />} />
         <Route path="/goals/:id" element={<AppContent />} />
         <Route path="/wins" element={<AppContent />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<AppContent />} />
       </Routes>
     </BrowserRouter>
   );
