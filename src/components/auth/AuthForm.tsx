@@ -19,8 +19,8 @@ export const AuthForm: React.FC = () => {
     setLoading(true);
     setMessage(null);
 
-    // Must redirect to /dashboard directly to avoid React Router stripping query params
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    // Redirect to /auth/callback to handle the OAuth code exchange
+    const redirectUrl = `${window.location.origin}/auth/callback`;
     console.log('OAuth redirectTo:', redirectUrl);
     localStorage.setItem('auth_debug', JSON.stringify([`Starting OAuth with redirectTo: ${redirectUrl}`]));
 

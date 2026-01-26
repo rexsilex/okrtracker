@@ -513,12 +513,69 @@ const AppContent = () => {
   );
 };
 
+// Auth callback component - handles OAuth redirect
+const AuthCallback = () => {
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error_param = params.get('error');
+      const error_description = params.get('error_description');
+
+      if (error_param) {
+        setError(error_description || error_param);
+        return;
+      }
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setError(error.message);
+          return;
+        }
+      }
+
+      // Redirect to dashboard after successful auth
+      navigate('/dashboard', { replace: true });
+    };
+
+    handleCallback();
+  }, [navigate]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="text-red-400 text-center">
+          <p className="text-lg mb-4">Authentication Error</p>
+          <p className="text-sm text-zinc-500">{error}</p>
+          <button
+            onClick={() => navigate('/', { replace: true })}
+            className="mt-4 px-4 py-2 bg-zinc-800 rounded hover:bg-zinc-700"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="text-zinc-400">Completing sign in...</div>
+    </div>
+  );
+};
+
 // Root App component with router
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={<AppContent />} />
         <Route path="/okrs" element={<AppContent />} />
         <Route path="/okrs/:id" element={<AppContent />} />
