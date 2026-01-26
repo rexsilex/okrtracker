@@ -54,32 +54,44 @@ const AppContent = () => {
       const error_param = params.get('error');
       const error_description = params.get('error_description');
 
+      // Store debug info in localStorage (survives redirects)
+      const debugInfo: string[] = JSON.parse(localStorage.getItem('auth_debug') || '[]');
+      debugInfo.push(`[${new Date().toISOString()}] URL: ${window.location.href}`);
+      debugInfo.push(`[${new Date().toISOString()}] code: ${code ? 'present' : 'missing'}, error: ${error_param || 'none'}`);
+
       // Log OAuth errors from URL
       if (error_param) {
-        console.error('OAuth error:', error_param, error_description);
+        debugInfo.push(`[${new Date().toISOString()}] OAuth error: ${error_param} - ${error_description}`);
+        localStorage.setItem('auth_debug', JSON.stringify(debugInfo.slice(-20)));
         alert(`Auth error: ${error_description || error_param}`);
       }
 
       if (code) {
-        console.log('Got auth code, exchanging for session...');
-        // Exchange the code for a session
+        debugInfo.push(`[${new Date().toISOString()}] Exchanging code for session...`);
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          console.error('Error exchanging code for session:', error);
+          debugInfo.push(`[${new Date().toISOString()}] Exchange error: ${error.message}`);
+          localStorage.setItem('auth_debug', JSON.stringify(debugInfo.slice(-20)));
           alert(`Session error: ${error.message}`);
         } else {
-          console.log('Session exchange successful:', data);
+          debugInfo.push(`[${new Date().toISOString()}] Exchange successful`);
         }
-        // Clean up URL
         window.history.replaceState({}, '', window.location.pathname);
       }
 
-      // Now get the session
+      // Check for previous debug info
+      const prevDebug = localStorage.getItem('auth_debug');
+      if (prevDebug && !code && !error_param) {
+        console.log('Previous auth debug:', JSON.parse(prevDebug));
+      }
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) {
-        console.error('Error getting session:', sessionError);
+        debugInfo.push(`[${new Date().toISOString()}] Session error: ${sessionError.message}`);
       }
-      console.log('Current session:', session ? 'exists' : 'null');
+      debugInfo.push(`[${new Date().toISOString()}] Session: ${session ? 'exists' : 'null'}`);
+      localStorage.setItem('auth_debug', JSON.stringify(debugInfo.slice(-20)));
+
       setSession(session);
       setLoading(false);
     };
