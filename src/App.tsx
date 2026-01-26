@@ -286,8 +286,11 @@ const AppContent = () => {
     );
   }
 
-  // Show auth form if not authenticated
+  // If not authenticated, show login at root or redirect to root
   if (!session) {
+    if (location.pathname !== '/') {
+      return <Navigate to="/" replace />;
+    }
     return <AuthForm />;
   }
 
