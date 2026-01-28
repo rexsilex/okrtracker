@@ -425,9 +425,12 @@ export const ObjectiveDetail: React.FC<ObjectiveDetailProps> = ({
 
     // Inline Edit Handlers
     const handleSaveTitle = async () => {
-        if (editedTitle.trim() && editedTitle !== objective.title) {
+        // Default to "Untitled" if title is empty
+        const finalTitle = editedTitle.trim() || 'Untitled';
+
+        if (finalTitle !== objective.title) {
             try {
-                await api.updateObjective({ ...objective, title: editedTitle });
+                await api.updateObjective({ ...objective, title: finalTitle });
                 const refreshed = await api.fetchObjectiveWithDetails(objective.id);
                 onUpdate(refreshed);
             } catch (error) {

@@ -144,6 +144,9 @@ export const createObjective = async (objective: Omit<Objective, 'id' | 'keyResu
   // Ensure user exists and get their ID
   const userId = await ensureUserExists();
 
+  // Validate title - default to "Untitled" if empty
+  const title = objective.title?.trim() || 'Untitled';
+
   // Get the highest order value to place new objective at the end (filter by type)
   const { data: maxOrderObj } = await supabase
     .from('objectives')
@@ -160,7 +163,7 @@ export const createObjective = async (objective: Omit<Objective, 'id' | 'keyResu
     .from('objectives')
     .insert({
       user_id: userId,
-      title: objective.title,
+      title: title,
       type: objective.type,
       status: 'new',
       category: objective.category,
@@ -188,10 +191,13 @@ export const createObjective = async (objective: Omit<Objective, 'id' | 'keyResu
 };
 
 export const updateObjective = async (objective: Objective): Promise<void> => {
+  // Validate title - default to "Untitled" if empty
+  const title = objective.title?.trim() || 'Untitled';
+
   const { error } = await supabase
     .from('objectives')
     .update({
-      title: objective.title,
+      title: title,
       type: objective.type,
       status: objective.status,
       category: objective.category,
