@@ -27,8 +27,21 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
   const [editedUnit, setEditedUnit] = useState(kr.unit);
   const [editedType, setEditedType] = useState<KeyResultType>(kr.type);
 
+  // Local state for input values to prevent premature updates
+  const [localCurrent, setLocalCurrent] = useState(kr.current.toString());
+  const [localTarget, setLocalTarget] = useState(kr.target.toString());
+
   const progress = kr.target === 0 ? 0 : (kr.current / kr.target) * 100;
   const isWinCondition = kr.type === 'win_condition';
+
+  // Sync local state when kr values change externally (e.g., from slider or buttons)
+  React.useEffect(() => {
+    setLocalCurrent(kr.current.toString());
+  }, [kr.current]);
+
+  React.useEffect(() => {
+    setLocalTarget(kr.target.toString());
+  }, [kr.target]);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);
@@ -36,13 +49,41 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    onUpdate({ ...kr, current: val });
+    setLocalCurrent(e.target.value);
+  };
+
+  const handleInputBlur = () => {
+    const val = Number(localCurrent);
+    if (!isNaN(val) && val !== kr.current) {
+      onUpdate({ ...kr, current: val });
+    } else {
+      setLocalCurrent(kr.current.toString());
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
   };
 
   const handleTargetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = Number(e.target.value);
+    setLocalTarget(e.target.value);
+  };
+
+  const handleTargetBlur = () => {
+    const val = Number(localTarget);
+    if (!isNaN(val) && val !== kr.target) {
       onUpdate({ ...kr, target: val });
+    } else {
+      setLocalTarget(kr.target.toString());
+    }
+  };
+
+  const handleTargetKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
   };
 
   const handleIncrement = (e: React.MouseEvent) => {
@@ -273,7 +314,14 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
                             <div className="flex items-center gap-3">
                                 <button onClick={handleDecrement} className="w-10 h-10 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors border border-zinc-700/50"><MinusIcon /></button>
                                 <div className="w-24">
-                                    <input type="number" value={kr.current} onChange={handleInputChange} className="w-full bg-zinc-950 border border-zinc-700 text-white text-center text-xl font-mono p-1.5 rounded-lg outline-none focus:border-violet-500/50" />
+                                    <input
+                                        type="number"
+                                        value={localCurrent}
+                                        onChange={handleInputChange}
+                                        onBlur={handleInputBlur}
+                                        onKeyDown={handleInputKeyDown}
+                                        className="w-full bg-zinc-950 border border-zinc-700 text-white text-center text-xl font-mono p-1.5 rounded-lg outline-none focus:border-violet-500/50"
+                                    />
                                 </div>
                                 <button onClick={handleIncrement} className="w-12 h-10 flex items-center justify-center rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-all shadow-lg shadow-violet-900/20 active:scale-95"><PlusIcon /></button>
                             </div>
@@ -286,7 +334,14 @@ export const KeyResultItem: React.FC<KeyResultItemProps> = ({
                         <div>
                              <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-2 block">Goal</label>
                              <div className="flex items-center bg-zinc-950 border border-zinc-700 rounded-lg px-3 h-10 w-32">
-                                <input type="number" value={kr.target} onChange={handleTargetChange} className="w-full bg-transparent text-white p-1 outline-none font-mono text-sm" />
+                                <input
+                                    type="number"
+                                    value={localTarget}
+                                    onChange={handleTargetChange}
+                                    onBlur={handleTargetBlur}
+                                    onKeyDown={handleTargetKeyDown}
+                                    className="w-full bg-transparent text-white p-1 outline-none font-mono text-sm"
+                                />
                                 <span className="text-zinc-500 text-xs select-none whitespace-nowrap overflow-hidden text-ellipsis max-w-[40px]">{kr.unit}</span>
                             </div>
                         </div>
