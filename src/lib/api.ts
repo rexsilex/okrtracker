@@ -92,7 +92,13 @@ export const fetchObjectives = async (type?: ObjectiveType): Promise<Objective[]
     .from('objectives')
     .select(`
       *,
-      key_results (*),
+      key_results (
+        *,
+        winLog:win_logs!key_result_id (
+          *,
+          attributions:win_attributions (person_id)
+        )
+      ),
       wins:win_logs!objective_id (
         *,
         attributions:win_attributions (person_id)
@@ -129,7 +135,12 @@ export const fetchObjectives = async (type?: ObjectiveType): Promise<Objective[]
         target: kr.target,
         unit: kr.unit,
         order: kr.order ?? 0,
-        winLog: [] // Will be fetched separately if needed
+        winLog: kr.winLog?.filter((w: any) => !w.deleted_at).map((w: any) => ({
+          id: w.id,
+          note: w.note,
+          date: new Date(w.date).toLocaleDateString(),
+          attributedTo: w.attributions?.filter((a: any) => !a.deleted_at).map((a: any) => a.person_id) || []
+        })) || []
       })) || [],
     wins: obj.wins?.filter((w: any) => !w.deleted_at).map((w: any) => ({
       id: w.id,
